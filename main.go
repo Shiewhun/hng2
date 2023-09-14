@@ -26,10 +26,9 @@ var (
 )
 
 func main() {
-	loadDataFromCSV()
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Print("In the /api handler.")
+
 		switch r.Method {
 		case http.MethodGet:
 			getPerson(w, r)
@@ -90,6 +89,7 @@ func getPerson(w http.ResponseWriter, r *http.Request) {
 func createPerson(w http.ResponseWriter, r *http.Request) {
 	personsLock.Lock()
 	defer personsLock.Unlock()
+	loadDataFromCSV()
 
 	// Parse the JSON payload
 	var newPerson Person
@@ -112,6 +112,15 @@ func createPerson(w http.ResponseWriter, r *http.Request) {
 	// Save the person's data
 	persons[newPerson.ID] = newPerson
 
+	// Check if the CSV file exists, and create it if not
+	if _, err := os.Stat(csvFile); os.IsNotExist(err) {
+		err := createCSVFile()
+		if err != nil {
+			http.Error(w, "Failed to create CSV file", http.StatusInternalServerError)
+			return
+		}
+	}
+
 	// Save the person to the CSV file
 	err = savePersonToCSV(newPerson)
 	if err != nil {
@@ -131,9 +140,30 @@ func createPerson(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
+func createCSVFile() error {
+	// Create a new CSV file and initialize it with headers
+	file, err := os.Create(csvFile)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Write headers
+	headers := []string{"ID", "Name"}
+	if err := writer.Write(headers); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func updatePerson(w http.ResponseWriter, r *http.Request) {
 	personsLock.Lock()
 	defer personsLock.Unlock()
+	loadDataFromCSV()
 
 	// Parse the URL to get the person's ID
 	idStr := r.URL.Path[len("/api/"):]
