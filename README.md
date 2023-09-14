@@ -1,5 +1,3 @@
-Creating a detailed README.md for your Go REST API project is essential to help users understand how to set up, run, and use your API effectively. Below is an example of what your README.md could look like in proper Markdown format:
-
 ```markdown
 # Go REST API for Managing Persons
 
