@@ -1,9 +1,9 @@
 ```markdown
-# API Documentation
+### API Documentation
 
 This document provides detailed documentation for the Go REST API for managing persons.
 
-## Table of Contents
+### Table of Contents
 
 - [Standard Request and Response Formats](#standard-request-and-response-formats)
 - [Sample API Usage](#sample-api-usage)
